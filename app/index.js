@@ -2,8 +2,15 @@ const { fromPath } = require("pdf2pic");
 const fs = require("fs");
 const pdfParse = require("pdf-parse");  // Add pdf-parse to extract the number of pages
 
+if (process.argv.length < 3) {
+  console.log("USAGE: node index.js [path/file.pdf]\n");
+  return 1;
+}
+
 // Step 1: Read the PDF and get the number of pages
-const pdfFilePath = "PRELIMPAF.pdf";
+const pdfFilePath = process.argv[2].toString();
+
+
 fs.readFile(pdfFilePath, (err, data) => {
   if (err) {
     console.error("Error reading PDF:", err);
