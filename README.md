@@ -5,7 +5,6 @@ This is a simple Node.js script that converts each page of a PDF into high-resol
 ## 📦 Features
 
 - Converts **every page** of a PDF into PNG format
-- Uses **600 DPI** for high-quality image output
 - Automatically detects the number of pages
 - Saves output to the `./images` directory
 
@@ -30,12 +29,14 @@ npm install pdf2pic pdf-parse
 
 ```bash
 node index.js path/to/your/file.pdf
+node index.js path/to/your/file.pdf density
 ```
 
 Example:
 
 ```bash
 node index.js ./sample.pdf
+node index.js ./sample.pdf 300
 ```
 
 The script will:
@@ -57,6 +58,7 @@ page.2.png
 ## 🧪 Sample Output
 
 ```
+DENSITY: 600
 Page 1 converted: { path: './images/page.1.png', ... }
 Page 2 converted: { path: './images/page.2.png', ... }
 ```
@@ -64,4 +66,4 @@ Page 2 converted: { path: './images/page.2.png', ... }
 ## ⚠️ Notes
 
 - Make sure the `images/` directory is writable.
-- The script uses a high resolution (600 DPI) by default; you can adjust this in the options inside the script.
+- The script uses a high resolution (600 DPI) by default; you can adjust this during execution.
