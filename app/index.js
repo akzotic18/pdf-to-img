@@ -1,64 +1,64 @@
-const { fromPath } = require("pdf2pic");
 const fs = require("fs");
-const pdfParse = require("pdf-parse");  // Add pdf-parse to extract the number of pages
-const defaultDensity = 600;
+const { PDFDocument } = require("pdf-lib");
+const path = require("path");
+const { convert } = require("pdf-poppler");
 
-var _density;
+const defaultDensity = 600;
+let _density;
 
 
 if (process.argv.length < 3) {
   console.log("USAGE: node index.js [path/file.pdf]\nUSAGE: node index.js [path/file.pdf] density");
-  return 1;
+  process.exit(1);
 }
 
-if (process.argv.length == 3) {
+if (process.argv.length === 3) {
   _density = defaultDensity;
 }
 
-if (process.argv.length == 4) {
-  try {
-    _density = process.argv[3].toString();
-  } catch (e) {
-    console.log(e.message);
-  }
+if (process.argv.length === 4) {
+  _density = parseInt(process.argv[3], 10) || defaultDensity;
 }
 
 // Step 1: Read the PDF and get the number of pages
 const pdfFilePath = process.argv[2].toString();
 
-fs.readFile(pdfFilePath, (err, data) => {
-  if (err) {
-    console.error("Error reading PDF:", err);
-    return;
+async function getNumPages(pdfPath) {
+  const data = await fs.promises.readFile(pdfPath);
+  const pdfDoc = await PDFDocument.load(data);
+  return pdfDoc.getPageCount();
+}
+
+async function convertPdfToImages(pdfPath, density) {
+  const outputDir = path.join(__dirname, "images");
+  if (!fs.existsSync(outputDir)) {
+    fs.mkdirSync(outputDir);
   }
 
-  pdfParse(data).then((pdfData) => {
+  const options = {
+    format: "png",
+    out_dir: outputDir,
+    out_prefix: "page",
+    page: null, // null means all pages
+    dpi: density,
+  };
 
-    const totalPages = pdfData.numpages; // Get the number of pages in the PDF
+  try {
+    await convert(pdfPath, options);
+    console.log(`PDF converted to images in ${outputDir}`);
+  } catch (err) {
+    console.error("Error converting PDF:", err);
+  }
+}
 
-    console.log('DENSITY: ', _density);
+(async () => {
+  try {
+    const totalPages = await getNumPages(pdfFilePath);
+    console.log("DENSITY:", _density);
+    console.log("Total pages:", totalPages);
 
-    // Step 2: Create the converter
-    const convert = fromPath(pdfFilePath, {
-      density: _density,                     // quality/resolution
-      saveFilename: "page",
-      savePath: "./images",
-      format: "png",
-      // width: 1024,                      // set only width
-      preserveAspectRatio: true,               // output format
-    });
-
-    // Step 3: Loop through each page and convert
-    for (let page = 1; page <= totalPages; page++) {
-      convert(page)
-        .then((res) => {
-          console.log(`Page ${page} converted:`, res);
-        })
-        .catch((err) => {
-          console.error(`Error converting page ${page}:`, err);
-        });
-    }
-  }).catch((err) => {
-    console.error("Error parsing PDF:", err);
-  });
-});
+    await convertPdfToImages(pdfFilePath, _density);
+  } catch (err) {
+    console.error("Error:", err);
+  }
+})();
