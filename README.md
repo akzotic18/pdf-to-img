@@ -1,6 +1,6 @@
 # PDF to PNG Converter
 
-This is a simple Node.js script that converts each page of a PDF into high-resolution PNG images using [`pdf2pic`](https://www.npmjs.com/package/pdf2pic) and `pdf-parse`.
+This is a simple Node.js script that converts each page of a PDF into high-resolution PNG images using pdf-poppler (UPDATED) and `pdf-parse`.
 
 ## 📦 Features
 
